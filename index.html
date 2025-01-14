@@ -13,7 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       color: #ffffff;
     }
     .container {
@@ -24,6 +24,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      margin: 20px;
     }
     h2 {
       text-align: center;
@@ -46,9 +47,13 @@
       font-size: 14px;
       box-sizing: border-box;
     }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
     .button {
-      display: block;
-      width: 100%;
+      flex: 1;
       padding: 10px;
       background: linear-gradient(135deg, #6a11cb, #2575fc);
       color: #ffffff;
@@ -76,6 +81,17 @@
       margin-top: 10px;
       font-size: 12px;
       color: #cccccc;
+    }
+    @media (min-width: 768px) {
+      .container {
+        max-width: 600px;
+      }
+      .form-group input {
+        font-size: 16px;
+      }
+      .button {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -115,7 +131,10 @@
         <label for="english">English (out of 40):</label>
         <input type="number" id="english" max="40" min="0" required>
       </div>
-      <button type="button" class="button" onclick="calculatePercentage()">Calculate Percentage</button>
+      <div class="buttons">
+        <button type="button" class="button" onclick="calculatePercentage()">Calculate</button>
+        <button type="button" class="button" onclick="resetForm()">Reset</button>
+      </div>
     </form>
     <div id="result" class="result"></div>
     <div class="footer">© 2025 Exam Calculator</div>
@@ -154,6 +173,11 @@
 
       document.getElementById("result").textContent =
         `Total Marks: ${totalObtained}/${totalMaxMarks} | Percentage: ${percentage}%`;
+    }
+
+    function resetForm() {
+      document.getElementById("calculator-form").reset();
+      document.getElementById("result").textContent = "";
     }
   </script>
 </body>
