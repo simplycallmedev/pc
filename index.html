@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exam Percentage Calculator</title>
+  <title>Exam Percentage Calculator with Leaderboard</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -19,7 +19,7 @@
     .container {
       background: #ffffff;
       color: #333333;
-      max-width: 400px;
+      max-width: 500px;
       width: 90%;
       padding: 20px;
       border-radius: 10px;
@@ -69,29 +69,35 @@
       background: linear-gradient(135deg, #2575fc, #6a11cb);
       transform: scale(1.05);
     }
-    .result {
+    .result, .leaderboard {
       margin-top: 20px;
-      text-align: center;
+    }
+    .result {
       font-size: 18px;
       font-weight: bold;
       color: #333333;
-    }
-    .footer {
       text-align: center;
-      margin-top: 10px;
-      font-size: 12px;
-      color: #cccccc;
     }
-    @media (min-width: 768px) {
-      .container {
-        max-width: 600px;
-      }
-      .form-group input {
-        font-size: 16px;
-      }
-      .button {
-        font-size: 18px;
-      }
+    .leaderboard {
+      margin-top: 30px;
+      font-size: 16px;
+    }
+    .leaderboard h3 {
+      color: #6a11cb;
+      margin-bottom: 10px;
+    }
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+    }
+    .leaderboard-list li {
+      margin: 5px 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #dddddd;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
     }
   </style>
 </head>
@@ -99,6 +105,10 @@
   <div class="container">
     <h2>Exam Percentage Calculator</h2>
     <form id="calculator-form">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter your name" required>
+      </div>
       <div class="form-group">
         <label for="science">Science (out of 40):</label>
         <input type="number" id="science" max="40" min="0" required>
@@ -132,16 +142,25 @@
         <input type="number" id="english" max="40" min="0" required>
       </div>
       <div class="buttons">
-        <button type="button" class="button" onclick="calculatePercentage()">Calculate</button>
+        <button type="button" class="button" onclick="calculate()">Calculate</button>
         <button type="button" class="button" onclick="resetForm()">Reset</button>
       </div>
     </form>
     <div id="result" class="result"></div>
-    <div class="footer">© 2025 Exam Calculator</div>
+    <div class="leaderboard">
+      <h3>Leaderboard</h3>
+      <ul id="leaderboard-list" class="leaderboard-list"></ul>
+    </div>
   </div>
 
   <script>
-    function calculatePercentage() {
+    function calculate() {
+      const name = document.getElementById("name").value.trim();
+      if (!name) {
+        alert("Name is required.");
+        return;
+      }
+
       const maxMarks = {
         science: 40,
         math: 40,
@@ -171,14 +190,51 @@
 
       const percentage = ((totalObtained / totalMaxMarks) * 100).toFixed(2);
 
-      document.getElementById("result").textContent =
-        `Total Marks: ${totalObtained}/${totalMaxMarks} | Percentage: ${percentage}%`;
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const existingUser = leaderboard.find(entry => entry.name === name);
+
+      if (existingUser) {
+        alert("You have already submitted your marks. You cannot submit again.");
+        return;
+      }
+
+      const save = confirm(`Your percentage is ${percentage}%. Do you want to save it?`);
+      if (save) {
+        saveToLeaderboard({ name, percentage: parseFloat(percentage) });
+        updateLeaderboard();
+        alert("Your marks have been saved to the leaderboard!");
+      } else {
+        alert(`Your percentage is ${percentage}%. It was not saved.`);
+      }
+
+      resetForm();
+    }
+
+    function saveToLeaderboard(result) {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.push(result);
+      leaderboard.sort((a, b) => b.percentage - a.percentage);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+    }
+
+    function updateLeaderboard() {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const leaderboardList = document.getElementById("leaderboard-list");
+      leaderboardList.innerHTML = "";
+
+      leaderboard.forEach((entry, index) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `<span>${index + 1}. ${entry.name}</span> <span>${entry.percentage}%</span>`;
+        leaderboardList.appendChild(listItem);
+      });
     }
 
     function resetForm() {
       document.getElementById("calculator-form").reset();
       document.getElementById("result").textContent = "";
     }
+
+    document.addEventListener("DOMContentLoaded", updateLeaderboard);
   </script>
 </body>
 </html>
